@@ -1,8 +1,9 @@
 {
     "listenPort": "8080",
     "healthCheckInterval": "5s",
+    "healthCheckEndpoint": "/ping",
     "servers": [
-        "http://localhost:8081",
-        "http://localhost:8082"
+        "http://localhost:8001",
+        "http://localhost:8002"
     ]
 }
