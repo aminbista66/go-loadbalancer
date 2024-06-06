@@ -11,6 +11,32 @@ import (
 	"time"
 )
 
+
+func createServerObject(config *common.Config) []*common.Server {
+	var servers []*common.Server
+	for _, serverUrl := range config.Servers {
+		u, _ := url.Parse(serverUrl)
+		servers = append(servers, &common.Server{URL: u})
+	}
+	return servers
+}
+
+func performHealthCheck(servers []*common.Server, healthCheckEndpoint string, healthCheckInterval time.Duration) {
+	for _, server := range servers {
+		go func(s *common.Server) {
+			for range time.Tick(healthCheckInterval) {
+				res, err := http.Get(s.URL.String() + healthCheckEndpoint)
+				if err != nil || res.StatusCode >= 500 {
+					s.Healthy = false
+				} else {
+					s.Healthy = true
+				}
+			}
+		}(server)
+	}
+}
+
+
 func main() {
 	config, err := config.LoadConfig("config.json")
 	if err != nil {
@@ -22,24 +48,9 @@ func main() {
 		log.Fatalf("Invalid health check interval: %s\n", err.Error())
 	}
 
-	var servers []*common.Server
-	for _, serverUrl := range config.Servers {
-		u, _ := url.Parse(serverUrl)
-		servers = append(servers, &common.Server{URL: u})
-	}
+	servers := createServerObject(&config)
 
-	for _, server := range servers {
-		go func(s *common.Server) {
-			for range time.Tick(healthCheckInterval) {
-				res, err := http.Get(s.URL.String() + config.HealthCheckEndpoint)
-				if err != nil || res.StatusCode >= 500 {
-					s.Healthy = false
-				} else {
-					s.Healthy = true
-				}
-			}
-		}(server)
-	}
+	performHealthCheck(servers, config.HealthCheckEndpoint, healthCheckInterval)
 
 	http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		server := algo.NextServerLeastActive(servers)
