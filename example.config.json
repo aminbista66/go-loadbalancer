@@ -3,7 +3,6 @@
     "healthCheckInterval": "5s",
     "healthCheckEndpoint": "/ping",
     "servers": [
-        "http://localhost:8001",
-        "http://localhost:8002"
+      "https://www.youtube.com"
     ]
 }
