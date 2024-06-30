@@ -43,6 +43,11 @@ func HandleAntiProxyMechanism(resp *http.Response) error {
 	return nil
 }
 
+func AddCookies(resp *http.Response) {
+	resp.Header.Add("Set-Cookie", "AK_SERVER_TIME=1719734195; expires=Sun, 30-Jun-2024 07:57:15 GMT; path=/; secure")
+	resp.Header.Add("Set-Cookie", "geo=GB,,LONDON,51.51,-0.13,2643743; expires=Sun, 30-Jun-2024 07:57:35 GMT; secure")
+}
+
 func (s *Server) AdvanceProxy() *httputil.ReverseProxy {
 	proxy := httputil.NewSingleHostReverseProxy(s.URL)
 
@@ -62,6 +67,8 @@ func (s *Server) AdvanceProxy() *httputil.ReverseProxy {
 
         // Add CORS headers to the response
         AddCORSHeaders(resp)
+        // Add cookies to the response
+        AddCookies(resp)
 		return nil
 	}
 

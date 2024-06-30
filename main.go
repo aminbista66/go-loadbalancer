@@ -43,14 +43,14 @@ func main() {
 		log.Fatalf("Error loading configuration: %s\n", err.Error())
 	}
 
-	// healthCheckInterval, err := time.ParseDuration(config.HealthCheckInterval)
-	// if err != nil {
-	// 	log.Fatalf("Invalid health check interval: %s\n", err.Error())
-	// }
+	healthCheckInterval, err := time.ParseDuration(config.HealthCheckInterval)
+	if err != nil {
+		log.Fatalf("Invalid health check interval: %s\n", err.Error())
+	}
 
 	servers := createServerObject(&config)
 
-	// performHealthCheck(servers, config.HealthCheckEndpoint, healthCheckInterval)
+	performHealthCheck(servers, config.HealthCheckEndpoint, healthCheckInterval)
 
 	http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		server := algo.NextServerLeastActive(servers)
@@ -58,8 +58,8 @@ func main() {
 		server.Mutex.Lock()
 		server.ActiveConnections++
 		server.Mutex.Unlock()
-		req.Header.Set("Origin", "https://www.youtube.com")
-		req.Header.Set("Referer", "https://www.youtube.com/")
+		req.Header.Set("Origin", server.URL.String())
+		req.Header.Set("Referer", server.URL.String())
 		req.Header.Set("Access-Control-Allow-Origin", "*")
 		server.AdvanceProxy().ServeHTTP(rw, req)
 		server.Mutex.Lock()
