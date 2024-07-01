@@ -25,8 +25,8 @@ func MimicBrowser(req *http.Request, s *Server) {
 	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
     req.Header.Set("Connection", "keep-alive")
-    req.Header.Set("Origin", "https://www.youtube.com")
-    req.Header.Set("Referer", "https://www.youtube.com/")
+    req.Header.Set("Origin", s.URL.String())
+    req.Header.Set("Referer", s.URL.String())
 	req.Host = s.URL.Host
 }
 
@@ -41,11 +41,6 @@ func HandleAntiProxyMechanism(resp *http.Response) error {
 		resp.Header.Set("Content-Type", "text/html; charset=UTF-8")
 	}
 	return nil
-}
-
-func AddCookies(resp *http.Response) {
-	resp.Header.Add("Set-Cookie", "AK_SERVER_TIME=1719734195; expires=Sun, 30-Jun-2024 07:57:15 GMT; path=/; secure")
-	resp.Header.Add("Set-Cookie", "geo=GB,,LONDON,51.51,-0.13,2643743; expires=Sun, 30-Jun-2024 07:57:35 GMT; secure")
 }
 
 func (s *Server) AdvanceProxy() *httputil.ReverseProxy {
@@ -67,8 +62,7 @@ func (s *Server) AdvanceProxy() *httputil.ReverseProxy {
 
         // Add CORS headers to the response
         AddCORSHeaders(resp)
-        // Add cookies to the response
-        AddCookies(resp)
+
 		return nil
 	}
 

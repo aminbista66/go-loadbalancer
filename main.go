@@ -54,7 +54,8 @@ func main() {
 
 	http.HandleFunc("/", func(rw http.ResponseWriter, req *http.Request) {
 		server := algo.NextServerLeastActive(servers)
-		log.Println("Proxying request to server", server.URL.String())
+		log.Printf("[ %v ] Request on current server: %v", req.Method, req.URL.String())
+		log.Printf("[ %v ] Proxy request to server url: %v \n", req.Method, server.URL.Hostname())
 		server.Mutex.Lock()
 		server.ActiveConnections++
 		server.Mutex.Unlock()
@@ -68,10 +69,9 @@ func main() {
 	})
 
 	log.Println("Starting server on port", config.ListenPort)
-	hostUrl := fmt.Sprintf("0.0.0.0:%v", config.ListenPort)
+	hostUrl := fmt.Sprintf(":%v", config.ListenPort)
 	err = http.ListenAndServe(hostUrl, nil)
 	if err != nil {
 		log.Fatalf("Error starting server: %s\n", err.Error())
 	}
-
 }
